@@ -1,0 +1,63 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="ka-queries">
+    <template>
+        <div id="queries" class="info-div">
+            <h3>Queries<paper-toggle-button active="{{liveUpdate}}">Live Update</paper-toggle-button></h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Intent</th>
+                    <th>Query</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </template>
+    <style>
+
+    </style>
+    <script>
+        Polymer({
+            is: 'ka-queries',
+            properties: {
+                liveUpdate: {
+                    type: Boolean,
+                    notify: true,
+                    value: false,
+                    observer: "_liveUpdater"
+                }
+            },
+            attached: function(){
+                this.datatable=$('#queries > table').DataTable({
+                    "searching": false,
+                    "sorting": false
+                });
+            },
+            _liveUpdater: function(){
+              if(this.liveUpdate){
+                  connect();
+              } else{
+                  disconnect();
+              }
+            },
+            updateQueryTable: function(query) {
+                var dateTime = new Date(query.timestamp);
+                var resolvedQuery = query.result.resolvedQuery;
+                var intent = query.intent;
+
+                this.datatable.row.add([
+                    dateTime.toLocaleString(),
+                    intent,
+                    resolvedQuery,
+                    ""
+                ]).draw();
+            }
+        });
+
+    </script>
+</dom-module>

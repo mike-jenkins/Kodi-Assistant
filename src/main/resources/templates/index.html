@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head lang="en">
+
+    <title>Kodi Assistant</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+
+    <link rel="stylesheet" href="../static/css/main.css" th:href="@{css/main.css}" media="screen"/>
+    <link rel="stylesheet" href="../static/css/wizard.css" th:href="@{css/wizard.css}" media="screen"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link href="/webjars/datatables/jquery.dataTables.css" rel="stylesheet" />
+
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/datatables/jquery.dataTables.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+
+    <script src="../static/js/jquery.validate.min.js" th:src="@{js/jquery.validate.min.js}"></script>
+    <script src="../static/js/jquery.steps.min.js" th:src="@{js/jquery.steps.min.js}"></script>
+
+    <script src="../static/js/main.js" th:src="@{js/main.js}"></script>
+
+    <!-- Bower Components -->
+    <link rel="import" href="../static/bower_components/polymer/polymer.html" th:href="@{bower_components/polymer/polymer.html}" />
+
+    <!--Iron-->
+    <link rel="import" href="../static/bower_components/iron-icon/iron-icon.html" th:href="@{bower_components/iron-icon/iron-icon.html}" />
+    <link rel="import" href="../static/bower_components/iron-icons/iron-icons.html" th:href="@{bower_components/iron-icons/iron-icons.html}" />
+    <link rel="import" href="../static/bower_components/iron-icons/editor-icons.html" th:href="@{bower_components/iron-icons/editor-icons.html}" />
+
+    <!--Paper-->
+    <link rel="import" href="../static/bower_components/paper-material/paper-material.html" th:href="@{bower_components/paper-material/paper-material.html}" />
+    <link rel="import" href="../static/bower_components/paper-listbox/paper-listbox.html" th:href="@{bower_components/paper-listbox/paper-listbox.html}" />
+    <link rel="import" href="../static/bower_components/paper-item/paper-item.html" th:href="@{bower_components/paper-item/paper-item.html}" />
+    <link rel="import" href="../static/bower_components/paper-input/paper-input.html" th:href="@{bower_components/paper-input/paper-input.html}" />
+    <link rel="import" href="../static/bower_components/paper-button/paper-button.html" th:href="@{bower_components/paper-button/paper-button.html}" />
+    <link rel="import" href="../static/bower_components/paper-icon-button/paper-icon-button.html" th:href="@{bower_components/paper-icon-button/paper-icon-button.html}" />
+    <link rel="import" href="../static/bower_components/paper-toggle-button/paper-toggle-button.html" th:href="@{bower_components/paper-toggle-button/paper-toggle-button.html}" />
+    <link rel="import" href="../static/bower_components/paper-dialog/paper-dialog.html" th:href="@{bower_components/paper-dialog/paper-dialog.html}" />
+
+    <!--My Components-->
+    <link rel="import" href="../static/my_components/ka-queries.html" th:href="@{my_components/ka-queries.html}" />
+</head>
+<body th:switch="${usersSetup}">
+<div id="versionInfo" th:text="${version}"></div>
+<form th:case="false" id="first-run-wizard" th:action="@{/newUserSetup}" th:object="${userConfig}" method="post">
+    <paper-material id="main" elevation="1">
+        <div class="form-title-row">
+            <h1 th:inline="text">Welcome to Kodi Assistant<span class="sub">alpha</span></h1>
+        </div>
+        <div id="steps">
+            <h3>Welcome</h3>
+            <section>
+                <p>Thank you for testing out Kodi Assistant. To begin, please go through this quick first run configuration.</p>
+            </section>
+
+            <h3>User Info</h3>
+            <section>
+                <div class="form-row">
+                    <label><!--
+                            <span>What shall I call you?</span>-->
+                        <paper-input id="name" name="userName" label="What shall I call you?"
+                                     class="required" th:field="*{userName}"
+                                     char-counter="true" maxlength="50"></paper-input>
+                    </label>
+                </div>
+            </section>
+
+            <h3>Kodi Info</h3>
+            <section>
+                <p>I'll use this information to connect to your Kodi player.  Remote control via HTTP must be enabled. These settings can be found in Kodi under Settings > Services > Web server.</p>
+                <!--<hr />-->
+                <div class="form-row">
+                    <paper-input type="text" id="kodiname" name="kodiName" label="Name"
+                                 placeholder="Family Room" th:field="*{kodiName}"
+                                 char-counter="true" maxlength="50" required="true"
+                                 auto-validate="true" error-message="This field is required"></paper-input>
+                </div>
+                <div class="form-row">
+                    <paper-input type="text" id="url" name="url" label="URL"
+                                 placeholder="http://localhost" th:field="*{url}"
+                                 char-counter="true" maxlength="100" required="true"
+                                 auto-validate="true" error-message="This field is required"></paper-input>
+                </div>
+                <div class="form-row">
+                    <paper-input type="number" id="port" name="port" label="Port"
+                                 placeholder="80" th:field="*{port}"
+                                 char-counter="true" maxlength="5" required="true"
+                                 auto-validate="true" error-message="This field is required"></paper-input>
+                </div>
+                <!--<hr />-->
+            </section>
+
+            <h3>Review</h3>
+            <section>
+                <h3>Your Info</h3>
+                <div class="form-row">
+                    <paper-input id="nameReview" readonly="true" label="Your Name"></paper-input>
+                </div>
+                <h3>Kodi Info</h3>
+                <div class="form-row">
+                    <paper-input type="text" id="kodinameReview" readonly="true" label="Name"></paper-input>
+                </div>
+                <div class="form-row">
+                    <paper-input type="text" id="urlReview" readonly="true" label="URL"></paper-input>
+                </div>
+                <div class="form-row">
+                    <paper-input type="number" id="portReview" readonly="true" label="Port"></paper-input>
+                </div>
+            </section>
+        </div>
+        <div class="clear"></div>
+    </paper-material>
+</form>
+
+<div id="container" th:case="true">
+    <paper-material id="main">
+        <paper-icon-button icon="more-vert" id="menu"></paper-icon-button>
+        <paper-dialog id="menuDialog">
+            <paper-listbox>
+                <paper-item id="appReset" dialog-dismiss>Reset App</paper-item>
+                <paper-item id="appHelp">Help</paper-item>
+                <paper-item id="appAbout">About</paper-item>
+            </paper-listbox>
+        </paper-dialog>
+        <paper-dialog modal id="resetDialog">
+            <p>Are you sure you want to delete all players and users?</p>
+            <paper-button raised class="dialog" dialog-dismiss>Cancel</paper-button>
+            <paper-button raised class="red dialog" id="appResetConfirm">Reset App</paper-button>
+        </paper-dialog>
+        <div class="form-title-row">
+            <h1>Kodi Assistant<span class="sub">alpha</span></h1>
+        </div>
+        <div th:inline="text" id="status">Status: <span class="good">Running</span></div>
+        <div id="users" class="info-div">
+            <h3>Users</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${userStat.index +1}"></td>
+                    <td th:text="${user.name}"></td>
+                    <td>
+                        <paper-icon-button icon="editor:mode-edit" disabled></paper-icon-button>
+                        <paper-icon-button icon="remove-circle" disabled></paper-icon-button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <paper-button raised disabled><iron-icon icon="add"></iron-icon> Add User</paper-button>
+        </div>
+        <div id="players" class="info-div">
+            <h3>Players</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Url</th>
+                    <th>Port</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="player : ${players}">
+                    <td th:text="${playerStat.index + 1}"></td>
+                    <td th:text="${player.name}"></td>
+                    <td th:text="${player.url}"></td>
+                    <td th:text="${player.port}"></td>
+                    <td>
+                        <paper-icon-button icon="editor:mode-edit" disabled></paper-icon-button>
+                        <paper-icon-button icon="remove-circle" disabled></paper-icon-button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <paper-button raised disabled><iron-icon icon="add"></iron-icon> Add Player</paper-button>
+
+        </div>
+        <ka-queries id="queries"></ka-queries>
+
+    </paper-material>
+</div>
+
+</body>
+</html>
